@@ -1,8 +1,8 @@
+// src/pages/company/Applicants.jsx
 export default function Applicants() {
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Applicants</h2>
-      <p>View qualified applicants automatically filtered by the system.</p>
+    <div className="flex flex-col items-center justify-center h-full text-center text-gray-600">
+      <h1 className="text-2xl font-semibold mb-2">Applicants Page is under construction</h1>
     </div>
   );
 }

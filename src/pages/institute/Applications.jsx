@@ -1,8 +1,8 @@
+// src/pages/institute/Applications.jsx
 export default function Applications() {
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Student Applications</h2>
-      <p>View and manage all student applications for your institution.</p>
+    <div className="flex flex-col items-center justify-center h-full text-center text-gray-600">
+      <h1 className="text-2xl font-semibold mb-2">Applications Page is under construction</h1>
     </div>
   );
 }

@@ -1,32 +1,68 @@
 // src/components/layout/DashboardLayout.jsx
-import React from "react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { AppSidebar } from "@/components/app-sidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { useAuth } from "@/contexts/AuthContext.jsx";
+import { Outlet } from "react-router-dom";
 
-export default function DashboardLayout({ role, children }) {
+export default function DashboardLayout() {
+  const { user, logout, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <p className="text-gray-700 text-lg font-medium">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <SidebarProvider
-      style={{
-        "--sidebar-width": "calc(var(--spacing) * 72)",
-        "--header-height": "calc(var(--spacing) * 12)",
-      }}
-    >
-      {/* Role-aware custom sidebar */}
-      <AppSidebar role={role} />
-
-      {/* Main content */}
+    <SidebarProvider>
+      <AppSidebar />
       <SidebarInset>
-        <SiteHeader />
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-navy text-slate-100 shadow-md">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4 border-slate-600" />
 
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {/* Render dashboard-specific children */}
-              {children}
-            </div>
+          <Breadcrumb className="flex-1">
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="/dashboard" className="text-slate-100 hover:text-teal-400">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block text-slate-400" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-slate-200">
+                  {user?.role?.toUpperCase() ?? "USER"}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
+          <div className="ml-auto flex items-center gap-4">
+            <button
+              onClick={logout}
+              className="rounded-md border border-slate-600 px-3 py-1 text-sm hover:bg-teal-600 hover:text-white transition"
+            >
+              Logout
+            </button>
           </div>
-        </div>
+        </header>
+
+        <main className="flex flex-1 flex-col gap-4 p-6 bg-slate-50 overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-lg shadow-inner">
+          <Outlet />
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

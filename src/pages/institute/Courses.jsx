@@ -1,8 +1,8 @@
+// src/pages/institute/Courses.jsx
 export default function Courses() {
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Manage Courses</h2>
-      <p>Create and manage courses under each faculty.</p>
+    <div className="flex flex-col items-center justify-center h-full text-center text-gray-600">
+      <h1 className="text-2xl font-semibold mb-2">Courses Page is under construction</h1>
     </div>
   );
 }
