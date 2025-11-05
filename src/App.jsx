@@ -6,6 +6,11 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 // Auth Pages
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
+import RequestAccess from "@/pages/auth/RequestAccess";
+
+// Shared Pages for Access Status
+import PendingApproval from "@/pages/shared/PendingApproval";
+import AccessDenied from "@/pages/shared/AccessDenied";
 
 // Admin Module
 import Institutions from "@/pages/admin/Institutions";
@@ -13,6 +18,7 @@ import FacultiesCourses from "@/pages/admin/FacultiesCourses";
 import Admissions from "@/pages/admin/Admissions";
 import Companies from "@/pages/admin/Companies";
 import Reports from "@/pages/admin/Reports";
+import AccessRequests from "@/pages/admin/AccessRequests";
 
 // Institute Module
 import Faculties from "@/pages/institute/Faculties";
@@ -43,6 +49,11 @@ function App() {
       <Route path="/" element={<Login />} />
       <Route path="/auth/login" element={<Login />} />
       <Route path="/auth/sign-up" element={<Signup />} />
+      <Route path="/auth/request-access" element={<RequestAccess />} />
+
+      {/* Shared Access Status Pages */}
+      <Route path="/access/pending" element={<PendingApproval />} />
+      <Route path="/access/denied" element={<AccessDenied />} />
 
       {/* Protected Routes with Dashboard Layout */}
       <Route
@@ -68,6 +79,7 @@ function App() {
         <Route path="admin/admissions" element={<Admissions />} />
         <Route path="admin/companies" element={<Companies />} />
         <Route path="admin/reports" element={<Reports />} />
+        <Route path="admin/access-requests" element={<AccessRequests />} />
 
         {/* Institute Module */}
         <Route path="institute/faculties" element={<Faculties />} />

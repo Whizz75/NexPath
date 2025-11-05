@@ -21,7 +21,6 @@ export const db = getFirestore(app)
 
 // Providers
 export const googleProvider = new GoogleAuthProvider()
-export const microsoftProvider = new OAuthProvider("microsoft.com")
 
 // Optional: set scopes for Microsoft or Google
 googleProvider.addScope("profile")

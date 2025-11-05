@@ -18,26 +18,45 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export function LoginForm({ className, ...props }) {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithEmail, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleEmailLogin = (e) => {
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
-    setError("Email/password login not implemented yet. Use Google instead.");
+    setError("");
+    setLoading(true);
+
+    try {
+      await loginWithEmail(email, password);
+      // redirect handled in AuthContext based on role/status
+    } catch (err) {
+      console.error(err);
+      // Custom messages for pending/denied users
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        setError("Invalid email or password.");
+      } else {
+        setError(err.message || "Login failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
+    setError("");
+    setLoading(true);
     try {
-      setLoading(true);
       await loginWithGoogle();
       // redirect handled in AuthContext
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Google login failed.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

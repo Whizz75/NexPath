@@ -34,7 +34,9 @@ export function AppSidebar() {
       { name: "Admissions", path: "/dashboard/admin/admissions", icon: FileText },
       { name: "Manage Companies", path: "/dashboard/admin/companies", icon: Users },
       { name: "System Reports", path: "/dashboard/admin/reports", icon: FileText },
+      { name: "Access Requests", path: "/dashboard/admin/access-requests", icon: FileText },
     ],
+    
     institute: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
       { name: "Manage Faculties", path: "/dashboard/institute/faculties", icon: BookOpen },

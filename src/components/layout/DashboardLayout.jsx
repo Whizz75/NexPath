@@ -51,6 +51,9 @@ export default function DashboardLayout() {
           </Breadcrumb>
 
           <div className="ml-auto flex items-center gap-4">
+            <span className="font-medium text-slate-100 hidden sm:block">
+              {user?.displayName ?? "Guest"}
+            </span>
             <button
               onClick={logout}
               className="rounded-md border border-slate-600 px-3 py-1 text-sm hover:bg-teal-600 hover:text-white transition"
@@ -60,9 +63,10 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col gap-4 p-6 bg-slate-50 overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-lg shadow-inner">
+        <main className="flex flex-1 flex-col gap-6 p-6 md:p-10 bg-background overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-2xl shadow-inner">
           <Outlet />
         </main>
+
       </SidebarInset>
     </SidebarProvider>
   );
