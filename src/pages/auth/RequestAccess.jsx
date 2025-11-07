@@ -88,7 +88,7 @@ export default function RequestAccess() {
                 <SelectValue placeholder="Select Type" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 text-slate-100">
-                <SelectItem value="institution">Institution</SelectItem>
+                <SelectItem value="institute">Institution</SelectItem>
                 <SelectItem value="company">Company</SelectItem>
               </SelectContent>
             </Select>
