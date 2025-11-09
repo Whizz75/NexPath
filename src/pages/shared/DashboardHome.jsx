@@ -1,33 +1,128 @@
-// src/pages/shared/DashboardHome.jsx
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  GraduationCap,
+  Users,
+  Building2,
+  ShieldCheck,
+  Settings,
+  BookOpen,
+  FileText,
+  ClipboardList,
+} from "lucide-react";
 
 export default function DashboardHome() {
   const { user, role, loading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-600">Loading dashboard...</p>
+      <div className="flex items-center justify-center h-screen bg-slate-950 text-slate-300">
+        <p className="animate-pulse">Loading your dashboard...</p>
       </div>
     );
   }
 
+  // Role-based dashboard links
+  const getLinks = () => {
+    switch (role) {
+      case "admin":
+        return [
+          { label: "Access Requests", icon: ShieldCheck, path: "/admin/access-requests" },
+          { label: "Institutions", icon: Building2, path: "/admin/institutions" },
+          { label: "Users", icon: Users, path: "/admin/users" },
+          { label: "Reports", icon: FileText, path: "/admin/reports" },
+        ];
+      case "institute":
+        return [
+          { label: "Profile", icon: Building2, path: "/institute/profile" },
+          { label: "Faculties", icon: Users, path: "/institute/faculties" },
+          { label: "Courses", icon: BookOpen, path: "/institute/courses" },
+          { label: "Requests", icon: ClipboardList, path: "/institute/requests" },
+        ];
+      case "student":
+        return [
+          { label: "My Courses", icon: BookOpen, path: "/student/courses" },
+          { label: "Progress", icon: GraduationCap, path: "/student/progress" },
+          { label: "Settings", icon: Settings, path: "/settings" },
+        ];
+      default:
+        return [
+          { label: "Get Started", icon: FileText, path: "/request-access" },
+        ];
+    }
+  };
+
+  const links = getLinks();
+
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8 bg-gray-50">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">
-        Welcome, {user?.name ?? "User"}!
-      </h1>
-      <p className="text-lg text-gray-600 mb-6">
-        Your role: <span className="font-semibold">{role?.toUpperCase() ?? "GUEST"}</span>
-      </p>
-      <div className="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
-        <h2 className="text-xl font-semibold text-gray-700 mb-2">
-          Dashboard
-        </h2>
-        <p className="text-gray-500">
-          This page is under construction. Please check back later for your module features.
-        </p>
+    <div className="relative h-screen w-full overflow-hidden text-slate-100">
+      {/* Background video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover"
+      >
+        <source src="/loop.mp4" type="video/mp4" />
+      </video>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 to-slate-950/90 backdrop-blur-sm" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-4"
+        >
+          Welcome, {user?.name ?? user?.displayName ?? "User"} 👋
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-lg text-slate-300 mb-10"
+        >
+          You’re logged in as <span className="font-semibold text-primary">{role?.toUpperCase() ?? "GUEST"}</span>
+        </motion.p>
+
+        {/* Quick Links */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl"
+        >
+          {links.map((link, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate(link.path)}
+              className="cursor-pointer bg-slate-900/70 border border-slate-800 hover:border-primary/50 transition-all rounded-2xl p-6 shadow-md flex flex-col items-center justify-center text-center"
+            >
+              <link.icon className="w-10 h-10 text-primary mb-3" />
+              <h3 className="text-lg font-semibold text-slate-100">{link.label}</h3>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="mt-12">
+          <Button
+            onClick={() => navigate("/settings")}
+            className="bg-primary hover:bg-primary/80 text-white rounded-xl px-6 py-2"
+          >
+            Account Settings
+          </Button>
+        </div>
       </div>
     </div>
   );
