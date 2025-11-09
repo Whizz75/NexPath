@@ -207,7 +207,7 @@ export default function Institutions() {
   const suspendedInstitutes = institutions.filter((i) => i.status === "suspended");
 
   return (
-    <div className="p-6 bg-background min-h-screen space-y-6">
+    <div className="p-6 bg-slate-900 min-h-screen space-y-6">
       {/* Pending Institutions */}
       <Card>
         <CardHeader>

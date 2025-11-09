@@ -71,7 +71,7 @@ export default function AccessRequests() {
   const filteredRequests = requests.filter((r) => r.status === filter);
 
   return (
-    <div className="min-h-screen bg-background p-8 text-slate-100">
+    <div className="min-h-screen bg-slate-900 p-8 text-slate-100">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <h1 className="text-3xl font-semibold tracking-wide text-primary">
           Access Management
