@@ -63,7 +63,7 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col gap-6 p-6 md:p-10 bg-background overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-2xl shadow-inner">
+        <main className="flex flex-1 flex-col gap-6 p-6 md:p-10 bg-slate-900 overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-2xl shadow-inner">
           <Outlet />
         </main>
 

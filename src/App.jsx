@@ -14,6 +14,7 @@ import AccessDenied from "@/pages/shared/AccessDenied";
 
 // Admin Module
 import Institutions from "@/pages/admin/Institutions";
+import AdminOverview from "@/pages/admin/AdminOverview";
 import FacultiesCourses from "@/pages/admin/FacultiesCourses";
 import FacultiesApproval from "@/pages/admin/FacultiesApproval";
 import Admissions from "@/pages/admin/Admissions";
@@ -76,6 +77,7 @@ function App() {
 
         {/* Admin Module */}
         <Route path="admin/institutions" element={<Institutions />} />
+        <Route path="admin/overview" element={<AdminOverview />} />
         <Route path="admin/faculties" element={<FacultiesCourses />} />
         <Route path="admin/faculty-requests" element={<FacultiesApproval />} />
         <Route path="admin/admissions" element={<Admissions />} />

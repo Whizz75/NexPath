@@ -29,6 +29,7 @@ export function AppSidebar() {
   const roleLinks = {
     admin: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
+      { name: "Overview", path: "/dashboard/admin/overview", icon: BookOpen },
       { name: "Manage Institutions", path: "/dashboard/admin/institutions", icon: BookOpen },
       { name: "Faculties & Courses", path: "/dashboard/admin/faculties", icon: Clipboard },
       { name: "Faculty Requests", path: "/dashboard/admin/faculty-requests", icon: FileText },
