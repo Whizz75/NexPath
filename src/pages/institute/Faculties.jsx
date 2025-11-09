@@ -1,173 +1,259 @@
+// src/pages/institute/Faculties.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
   collection,
   addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
   query,
   where,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Faculties() {
   const [faculties, setFaculties] = useState([]);
-  const [facultyName, setFacultyName] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [expandedFaculty, setExpandedFaculty] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [courses, setCourses] = useState({});
-  const user = auth.currentUser;
 
-  const fetchFaculties = async () => {
-    if (!user) return;
-    const q = query(collection(db, "faculties"), where("instituteId", "==", user.uid));
-    const snapshot = await getDocs(q);
-    setFaculties(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  };
+  useEffect(() => {
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (!user) return;
+      setUserId(user.uid);
 
-  const fetchCourses = async (facultyId) => {
-    const q = query(collection(db, "courses"), where("facultyId", "==", facultyId));
-    const snapshot = await getDocs(q);
-    setCourses((prev) => ({
-      ...prev,
-      [facultyId]: snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
-    }));
-  };
+      const q = query(collection(db, "faculties"), where("instituteId", "==", user.uid));
+      const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setFaculties(data);
+      });
 
-  const addFaculty = async () => {
-    if (!facultyName.trim() || !user) return;
-    setLoading(true);
-    await addDoc(collection(db, "faculties"), {
-      name: facultyName,
-      instituteId: user.uid,
-      status: "pending", // 👈 requires admin approval
-      createdAt: new Date(),
+      return () => unsubscribeSnapshot();
     });
-    setFacultyName("");
-    await fetchFaculties();
-    setLoading(false);
-  };
 
-  const deleteFaculty = async (id) => {
-    await deleteDoc(doc(db, "faculties", id));
-    await fetchFaculties();
-  };
+    return () => unsubscribeAuth();
+  }, []);
 
-  const toggleFaculty = async (facultyId) => {
-    if (expandedFaculty === facultyId) {
-      setExpandedFaculty(null);
-    } else {
-      setExpandedFaculty(facultyId);
-      if (!courses[facultyId]) await fetchCourses(facultyId);
+  // Fetch courses for each faculty
+  useEffect(() => {
+    faculties.forEach((faculty) => {
+      const q = query(collection(db, "courses"), where("facultyId", "==", faculty.id));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCourses((prev) => ({ ...prev, [faculty.id]: data }));
+      });
+      return () => unsubscribe();
+    });
+  }, [faculties]);
+
+  const handleCreateOrUpdate = async () => {
+    if (!name.trim()) return;
+    setLoading(true);
+    try {
+      if (editingId) {
+        const ref = doc(db, "faculties", editingId);
+        await updateDoc(ref, {
+          name,
+          description,
+          status: "pending",
+          updatedAt: serverTimestamp(),
+        });
+        setEditingId(null);
+      } else {
+        await addDoc(collection(db, "faculties"), {
+          name,
+          description,
+          instituteId: userId,
+          status: "pending",
+          createdAt: serverTimestamp(),
+        });
+      }
+      setName("");
+      setDescription("");
+    } catch (err) {
+      console.error("Error saving faculty:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchFaculties();
-  }, [user]);
+  const handleEdit = (faculty) => {
+    setEditingId(faculty.id);
+    setName(faculty.name);
+    setDescription(faculty.description);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await updateDoc(doc(db, "faculties", id), {
+        deleteRequested: true,
+        status: "pending",
+      });
+    } catch (err) {
+      console.error("Error requesting delete:", err);
+    }
+  };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Manage Faculties</h1>
+    <div className="p-6 space-y-6">
+      {/* Form */}
+      <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-md">
+        <h1 className="text-2xl font-semibold mb-4 text-primary">
+          Faculties Management
+        </h1>
 
-      <div className="flex gap-2 mb-6">
-        <Input
-          placeholder="Enter faculty name"
-          value={facultyName}
-          onChange={(e) => setFacultyName(e.target.value)}
-        />
-        <Button onClick={addFaculty} disabled={loading}>
-          {loading ? "Submitting..." : "Request Faculty"}
-        </Button>
+        <div className="space-y-4">
+          <Input
+            placeholder="Faculty Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Textarea
+            placeholder="Faculty Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Button onClick={handleCreateOrUpdate} disabled={loading}>
+            {loading
+              ? "Submitting..."
+              : editingId
+              ? "Request Update"
+              : "Request Creation"}
+          </Button>
+          {editingId && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setEditingId(null);
+                setName("");
+                setDescription("");
+              }}
+            >
+              Cancel
+            </Button>
+          )}
+        </div>
       </div>
 
-      <ul className="space-y-3">
-        {faculties.map((f) => (
-          <li
-            key={f.id}
-            className="border rounded-lg p-4 bg-white shadow-sm"
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="font-semibold text-lg">{f.name}</h2>
-                <p
-                  className={`text-sm mt-1 ${
-                    f.status === "approved"
-                      ? "text-green-600"
-                      : f.status === "pending"
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  Status: {f.status.charAt(0).toUpperCase() + f.status.slice(1)}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => toggleFaculty(f.id)}
-                  className="flex items-center gap-1"
-                >
-                  {expandedFaculty === f.id ? (
-                    <>
-                      Hide Courses <ChevronUp size={16} />
-                    </>
-                  ) : (
-                    <>
-                      View Courses <ChevronDown size={16} />
-                    </>
-                  )}
-                </Button>
-
-                {f.status === "pending" ? (
-                  <Button variant="destructive" disabled>
-                    Awaiting Approval
-                  </Button>
-                ) : (
-                  <Button
-                    variant="destructive"
-                    onClick={() => deleteFaculty(f.id)}
+      {/* Faculties List */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {faculties.length > 0 ? (
+          faculties.map((faculty) => (
+            <Card
+              key={faculty.id}
+              className={`transition-all border ${
+                faculty.status === "approved"
+                  ? "border-primary"
+                  : faculty.status === "pending"
+                  ? "border-muted"
+                  : "border-destructive"
+              }`}
+            >
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>{faculty.name}</span>
+                  <span
+                    className={`text-sm px-2 py-1 rounded ${
+                      faculty.status === "approved"
+                        ? "bg-primary/20 text-primary"
+                        : faculty.status === "pending"
+                        ? "bg-muted/20 text-muted-foreground"
+                        : "bg-destructive/20 text-destructive"
+                    }`}
                   >
-                    Delete
-                  </Button>
-                )}
-              </div>
-            </div>
+                    {faculty.status}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-muted-foreground text-sm">
+                  {faculty.description || "No description provided."}
+                </p>
 
-            {expandedFaculty === f.id && (
-              <div className="mt-4 border-t pt-3">
-                <h3 className="text-sm font-medium mb-2">Courses:</h3>
-                {courses[f.id]?.length ? (
-                  <ul className="space-y-1">
-                    {courses[f.id].map((c) => (
-                      <li
-                        key={c.id}
-                        className="flex justify-between items-center border rounded-md p-2"
-                      >
-                        <span>{c.name}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            window.location.assign(`/institute/courses?id=${c.id}`)
-                          }
-                        >
-                          Manage
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-gray-500">No courses found.</p>
-                )}
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+                <div className="flex justify-between mt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(faculty)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDelete(faculty.id)}
+                  >
+                    Request Delete
+                  </Button>
+                </div>
+
+                {/* Inline Courses */}
+                <div className="mt-4 border-t border-border pt-3">
+                  <p className="text-sm font-semibold mb-2 text-primary">
+                    Courses
+                  </p>
+                  {courses[faculty.id]?.length > 0 ? (
+                    <ul className="space-y-1 text-muted-foreground text-sm">
+                      {courses[faculty.id].map((course) => (
+                        <li key={course.id} className="flex justify-between">
+                          <span>{course.name}</span>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded ${
+                              course.status === "approved"
+                                ? "bg-primary/20 text-primary"
+                                : "bg-muted/20 text-muted-foreground"
+                            }`}
+                          >
+                            {course.status}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No courses yet.
+                    </p>
+                  )}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={() =>
+                      alert("Navigate to Courses page for " + faculty.name)
+                    }
+                  >
+                    Manage Courses →
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p className="text-muted-foreground text-center col-span-full">
+            No faculties created yet.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

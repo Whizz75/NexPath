@@ -1,4 +1,3 @@
-// src/pages/admin/AccessRequests.jsx
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import {
@@ -9,15 +8,17 @@ import {
   updateDoc,
   doc,
   serverTimestamp,
+  orderBy,
 } from "firebase/firestore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function AccessRequests() {
   const [requests, setRequests] = useState([]);
+  const [filter, setFilter] = useState("pending");
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(null); // track action per request
+  const [actionLoading, setActionLoading] = useState(null);
   const { role } = useAuth();
 
   useEffect(() => {
@@ -27,10 +28,10 @@ export default function AccessRequests() {
       setLoading(true);
       try {
         const usersRef = collection(db, "users");
-        const q = query(usersRef, where("status", "==", "pending"));
+        const q = query(usersRef, orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        const pendingUsers = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setRequests(pendingUsers);
+        const allUsers = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setRequests(allUsers);
       } catch (err) {
         console.error("Error fetching access requests:", err);
       } finally {
@@ -61,51 +62,101 @@ export default function AccessRequests() {
 
   if (role !== "admin") {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
+      <div className="min-h-screen flex items-center justify-center text-red-500 text-lg font-semibold">
         Access Denied
       </div>
     );
   }
 
+  const filteredRequests = requests.filter((r) => r.status === filter);
+
   return (
-    <div className="min-h-screen bg-slate-950 p-6 flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-slate-100">Pending Access Requests</h1>
+    <div className="min-h-screen bg-background p-8 text-slate-100">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <h1 className="text-3xl font-semibold tracking-wide text-primary">
+          Access Management
+        </h1>
+
+        <div className="flex gap-3">
+          {["pending", "approved", "denied"].map((f) => (
+            <Button
+              key={f}
+              onClick={() => setFilter(f)}
+              variant={filter === f ? "default" : "outline"}
+              className={`capitalize ${
+                filter === f
+                  ? "bg-primary text-white"
+                  : "bg-transparent border border-slate-600 text-slate-300 hover:bg-slate-800"
+              }`}
+            >
+              {f}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {loading ? (
-        <p className="text-slate-400">Loading requests...</p>
-      ) : requests.length === 0 ? (
-        <p className="text-slate-400">No pending requests.</p>
+        <p className="text-slate-400 animate-pulse">Fetching access requests...</p>
+      ) : filteredRequests.length === 0 ? (
+        <p className="text-slate-400">No {filter} requests found.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {requests.map((request) => (
-            <Card key={request.id} className="bg-slate-900 text-slate-100">
+          {filteredRequests.map((req) => (
+            <Card
+              key={req.id}
+              className="bg-slate-900/60 border border-slate-800 hover:border-primary/50 transition-all"
+            >
               <CardHeader>
-                <CardTitle>{request.name}</CardTitle>
+                <CardTitle className="text-lg font-medium flex justify-between">
+                  {req.name || "Unnamed User"}
+                  <span
+                    className={`text-xs font-semibold uppercase px-2 py-1 rounded ${
+                      req.status === "approved"
+                        ? "bg-green-600/20 text-green-400"
+                        : req.status === "denied"
+                        ? "bg-red-600/20 text-red-400"
+                        : "bg-yellow-600/20 text-yellow-400"
+                    }`}
+                  >
+                    {req.status}
+                  </span>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <p>Email: {request.email}</p>
-                <p>Role: {request.role}</p>
-                <p>Status: {request.status}</p>
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    className="bg-green-600 hover:bg-green-700"
-                    onClick={() => handleAction(request.id, "approved")}
-                    disabled={actionLoading === request.id}
-                  >
-                    {actionLoading === request.id && request.status !== "approved"
-                      ? "Processing..."
-                      : "Approve"}
-                  </Button>
-                  <Button
-                    className="bg-red-600 hover:bg-red-700"
-                    onClick={() => handleAction(request.id, "denied")}
-                    disabled={actionLoading === request.id}
-                  >
-                    {actionLoading === request.id && request.status !== "denied"
-                      ? "Processing..."
-                      : "Deny"}
-                  </Button>
-                </div>
+
+              <CardContent className="space-y-2 text-sm">
+                <p>
+                  <span className="font-semibold text-slate-300">Email:</span>{" "}
+                  {req.email}
+                </p>
+                <p>
+                  <span className="font-semibold text-slate-300">Role:</span>{" "}
+                  {req.role}
+                </p>
+                <p>
+                  <span className="font-semibold text-slate-300">Created:</span>{" "}
+                  {req.createdAt
+                    ? new Date(req.createdAt.seconds * 1000).toLocaleString()
+                    : "-"}
+                </p>
+
+                {filter === "pending" && (
+                  <div className="flex gap-2 pt-3">
+                    <Button
+                      onClick={() => handleAction(req.id, "approved")}
+                      disabled={actionLoading === req.id}
+                      className="bg-green-600 hover:bg-green-700 flex-1"
+                    >
+                      {actionLoading === req.id ? "Processing..." : "Approve"}
+                    </Button>
+                    <Button
+                      onClick={() => handleAction(req.id, "denied")}
+                      disabled={actionLoading === req.id}
+                      className="bg-red-600 hover:bg-red-700 flex-1"
+                    >
+                      {actionLoading === req.id ? "Processing..." : "Deny"}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

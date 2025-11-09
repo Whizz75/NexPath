@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import {
@@ -7,7 +8,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, query, collection, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
@@ -15,19 +16,27 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
-  const [status, setStatus] = useState(null); // "approved" | "pending" | "denied"
+  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
   const navigate = useNavigate();
 
+  // Handles redirection logic
   const redirectUser = (userData) => {
     if (!userData) return navigate("/auth/login");
-    if (userData.status === "pending") navigate("/access/pending");
-    else if (userData.status === "denied") navigate("/access/denied");
-    else if (userData.role) navigate(`/dashboard/${userData.role.toLowerCase()}`);
-    else navigate("/auth/login");
+
+    const userStatus = userData.status;
+    const userRole = userData.role?.toLowerCase();
+
+    if (userStatus === "pending") return navigate("/access/pending");
+    if (userStatus === "denied") return navigate("/access/denied");
+    if (userStatus === "suspended") return navigate("/access/suspended");
+
+    if (userRole) return navigate(`/dashboard/${userRole}`);
+    navigate("/auth/login");
   };
 
+  // Watches auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
@@ -39,27 +48,36 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+
         let userData;
 
-        if (userDoc.exists()) {
-          // User exists: could be student or approved request-access user
-          userData = userDoc.data();
+        if (userSnap.exists()) {
+          userData = userSnap.data();
+
+          // Check institution status if user belongs to one
+          if (userData.institutionId) {
+            const instRef = doc(db, "institutions", userData.institutionId);
+            const instSnap = await getDoc(instRef);
+            if (instSnap.exists() && instSnap.data().status === "suspended") {
+              userData.status = "suspended";
+            }
+          }
         } else {
-          // New student signup
+          // New user — default to student
           userData = {
             uid: currentUser.uid,
             email: currentUser.email,
             role: "student",
             status: "approved",
           };
-          await setDoc(userDocRef, userData);
+          await setDoc(userRef, userData);
         }
 
         setUser({ ...currentUser, ...userData });
         setRole(userData.role);
-        setStatus(userData.status || "pending");
+        setStatus(userData.status);
 
         if (initialLoad) {
           redirectUser(userData);
@@ -75,28 +93,31 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, [navigate, initialLoad]);
 
-  // --- Auth actions ---
+  // ----------- LOGIN / SIGNUP ACTIONS -----------
+
   const loginWithEmail = async (email, password) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const currentUser = userCredential.user;
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      const currentUser = userCred.user;
 
-      // Check Firestore for approved/pending/denied accessRequests
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const userDoc = await getDoc(userDocRef);
-      let userData;
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      let userData = userSnap.exists()
+        ? userSnap.data()
+        : { uid: currentUser.uid, email, role: "student", status: "approved" };
 
-      if (userDoc.exists()) {
-        userData = userDoc.data();
-      } else {
-        // No user doc yet, treat as normal student (or pending request)
-        userData = { uid: currentUser.uid, email: currentUser.email, role: "student", status: "approved" };
-        await setDoc(userDocRef, userData);
+      // Check if institution suspended
+      if (userData.institutionId) {
+        const instRef = doc(db, "institutions", userData.institutionId);
+        const instSnap = await getDoc(instRef);
+        if (instSnap.exists() && instSnap.data().status === "suspended") {
+          userData.status = "suspended";
+        }
       }
 
       setUser({ ...currentUser, ...userData });
       setRole(userData.role);
-      setStatus(userData.status || "pending");
+      setStatus(userData.status);
       redirectUser(userData);
     } catch (err) {
       console.error("Login error:", err);
@@ -109,20 +130,24 @@ export function AuthProvider({ children }) {
       const result = await signInWithPopup(auth, googleProvider);
       const currentUser = result.user;
 
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const userDoc = await getDoc(userDocRef);
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      let userData = userSnap.exists()
+        ? userSnap.data()
+        : { uid: currentUser.uid, email: currentUser.email, role: "student", status: "approved" };
 
-      let userData;
-      if (userDoc.exists()) {
-        userData = userDoc.data();
-      } else {
-        userData = { uid: currentUser.uid, email: currentUser.email, role: "student", status: "approved" };
-        await setDoc(userDocRef, userData);
+      // Institution check
+      if (userData.institutionId) {
+        const instRef = doc(db, "institutions", userData.institutionId);
+        const instSnap = await getDoc(instRef);
+        if (instSnap.exists() && instSnap.data().status === "suspended") {
+          userData.status = "suspended";
+        }
       }
 
       setUser({ ...currentUser, ...userData });
       setRole(userData.role);
-      setStatus(userData.status || "pending");
+      setStatus(userData.status);
       redirectUser(userData);
     } catch (err) {
       console.error("Google login error:", err);
@@ -132,10 +157,10 @@ export function AuthProvider({ children }) {
 
   const signupWithEmail = async (email, password, name) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const newUser = userCredential.user;
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      const newUser = userCred.user;
 
-      const userData = { uid: newUser.uid, email: newUser.email, name, role: "student", status: "approved" };
+      const userData = { uid: newUser.uid, email, name, role: "student", status: "approved" };
       await setDoc(doc(db, "users", newUser.uid), userData);
 
       setUser({ ...newUser, ...userData });
@@ -163,7 +188,18 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, status, loading, loginWithEmail, loginWithGoogle, logout, signupWithEmail }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        role,
+        status,
+        loading,
+        loginWithEmail,
+        loginWithGoogle,
+        signupWithEmail,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

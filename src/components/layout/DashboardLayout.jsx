@@ -52,7 +52,7 @@ export default function DashboardLayout() {
 
           <div className="ml-auto flex items-center gap-4">
             <span className="font-medium text-slate-100 hidden sm:block">
-              {user?.displayName ?? "Guest"}
+              {user?.displayName ?? user?.name ?? "Guest"}
             </span>
             <button
               onClick={logout}
