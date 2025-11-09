@@ -12,6 +12,10 @@ import {
   BookOpen,
   FileText,
   ClipboardList,
+  Briefcase,
+  CalendarCheck,
+  BarChart3,
+  Bell,
 } from "lucide-react";
 
 export default function DashboardHome() {
@@ -26,28 +30,36 @@ export default function DashboardHome() {
     );
   }
 
-  // Role-based dashboard links
+  // Role-based dashboard links (4 main pages per role)
   const getLinks = () => {
     switch (role) {
       case "admin":
         return [
-          { label: "Access Requests", icon: ShieldCheck, path: "/admin/access-requests" },
-          { label: "Institutions", icon: Building2, path: "/admin/institutions" },
-          { label: "Users", icon: Users, path: "/admin/users" },
-          { label: "Reports", icon: FileText, path: "/admin/reports" },
+          { label: "Access Requests", icon: ShieldCheck, path: "/dashboard/admin/access-requests" },
+          { label: "Institutions", icon: Building2, path: "/dashboard/admin/institutions" },
+          { label: "Companies", icon: Briefcase, path: "/dashboard/admin/companies" },
+          { label: "Reports", icon: FileText, path: "/dashboard/admin/reports" },
         ];
       case "institute":
         return [
-          { label: "Profile", icon: Building2, path: "/institute/profile" },
-          { label: "Faculties", icon: Users, path: "/institute/faculties" },
-          { label: "Courses", icon: BookOpen, path: "/institute/courses" },
-          { label: "Requests", icon: ClipboardList, path: "/institute/requests" },
+          { label: "Profile", icon: Building2, path: "/dashboard/institute/profile" },
+          { label: "Faculties", icon: Users, path: "/dashboard/institute/faculties" },
+          { label: "Courses", icon: BookOpen, path: "/dashboard/institute/courses" },
+          { label: "Admissions", icon: ClipboardList, path: "/dashboard/institute/admissions" },
         ];
       case "student":
         return [
-          { label: "My Courses", icon: BookOpen, path: "/student/courses" },
-          { label: "Progress", icon: GraduationCap, path: "/student/progress" },
-          { label: "Settings", icon: Settings, path: "/settings" },
+          { label: "Apply", icon: BookOpen, path: "/dashboard/student/apply" },
+          { label: "Admissions", icon: GraduationCap, path: "/dashboard/student/admissions" },
+          { label: "Jobs", icon: Briefcase, path: "/dashboard/student/jobs" },
+          { label: "Notifications", icon: Bell, path: "/dashboard/student/notifications" },
+        ];
+      case "company":
+        return [
+          { label: "Job Posts", icon: Briefcase, path: "/dashboard/company/jobs" },
+          { label: "Applicants", icon: Users, path: "/dashboard/company/applicants" },
+          { label: "Matched Candidates", icon: FileText, path: "/dashboard/company/matches" },
+          { label: "Interviews", icon: CalendarCheck, path: "/dashboard/company/interviews" },
         ];
       default:
         return [
@@ -82,7 +94,7 @@ export default function DashboardHome() {
           transition={{ duration: 0.8 }}
           className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-4"
         >
-          Welcome, {user?.name ?? user?.displayName ?? "User"} 👋
+          Welcome, {user?.name ?? user?.displayName ?? "User"}
         </motion.h1>
 
         <motion.p
@@ -114,15 +126,6 @@ export default function DashboardHome() {
             </motion.div>
           ))}
         </motion.div>
-
-        <div className="mt-12">
-          <Button
-            onClick={() => navigate("/settings")}
-            className="bg-primary hover:bg-primary/80 text-white rounded-xl px-6 py-2"
-          >
-            Account Settings
-          </Button>
-        </div>
       </div>
     </div>
   );
