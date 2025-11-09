@@ -1,58 +1,116 @@
 // src/pages/admin/AdminOverview.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
 import { motion } from "framer-motion";
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  LineChart,
+  Line,
+  ResponsiveContainer,
 } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function AdminOverview() {
   const { user } = useAuth();
-  const [metrics, setMetrics] = useState({
-    totalUsers: 0,
-    students: 0,
-    faculty: 0,
-    admissions: { pending: 0, admitted: 0, waitlisted: 0 },
-  });
 
+  const [metrics, setMetrics] = useState({
+    users: 0,
+    students: 0,
+    faculties: 0,
+    courses: 0,
+    applications: { admitted: 0, pending: 0, waitlisted: 0 },
+  });
   const [roleData, setRoleData] = useState([]);
-  const [activity, setActivity] = useState([]);
+  const [recentApps, setRecentApps] = useState([]);
+  const [trendData, setTrendData] = useState([]);
 
   useEffect(() => {
-    async function fetchData() {
-      const usersSnap = await getDocs(collection(db, "users"));
-      const admissionsSnap = await getDocs(collection(db, "admissions"));
-
-      const users = usersSnap.docs.map(doc => doc.data());
-      const admissions = admissionsSnap.docs.map(doc => doc.data());
-
+    // Real-time listeners
+    const unsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+      const users = snapshot.docs.map((d) => d.data());
       const roleCounts = users.reduce((acc, u) => {
         acc[u.role] = (acc[u.role] || 0) + 1;
         return acc;
       }, {});
-
-      const admissionsCounts = admissions.reduce((acc, a) => {
-        acc[a.status] = (acc[a.status] || 0) + 1;
-        return acc;
-      }, {});
-
-      setMetrics({
-        totalUsers: users.length,
+      setRoleData(
+        Object.entries(roleCounts).map(([role, value]) => ({
+          name: role,
+          value,
+        }))
+      );
+      setMetrics((prev) => ({
+        ...prev,
+        users: users.length,
         students: roleCounts["student"] || 0,
-        faculty: roleCounts["faculty"] || 0,
-        admissions: {
-          pending: admissionsCounts["pending"] || 0,
-          admitted: admissionsCounts["admitted"] || 0,
-          waitlisted: admissionsCounts["waitlisted"] || 0,
-        },
-      });
+      }));
+    });
 
-      setRoleData(Object.entries(roleCounts).map(([role, count]) => ({ name: role, value: count })));
-    }
+    const unsubFaculties = onSnapshot(collection(db, "faculties"), (snapshot) => {
+      setMetrics((prev) => ({ ...prev, faculties: snapshot.size }));
+    });
 
-    fetchData();
+    const unsubCourses = onSnapshot(collection(db, "courses"), (snapshot) => {
+      setMetrics((prev) => ({ ...prev, courses: snapshot.size }));
+    });
+
+    const unsubApplications = onSnapshot(
+      query(collection(db, "applications"), orderBy("createdAt", "desc")),
+      (snapshot) => {
+        const apps = snapshot.docs.map((d) => d.data());
+        const counts = apps.reduce((acc, a) => {
+          acc[a.status] = (acc[a.status] || 0) + 1;
+          return acc;
+        }, {});
+        setMetrics((prev) => ({
+          ...prev,
+          applications: {
+            admitted: counts["admitted"] || 0,
+            pending: counts["pending"] || 0,
+            waitlisted: counts["waitlisted"] || 0,
+          },
+        }));
+
+        // Top 5 recent
+        setRecentApps(apps.slice(0, 5));
+
+        // Prepare trend data (count apps by day)
+        const byDay = {};
+        apps.forEach((a) => {
+          if (a.createdAt?.toDate) {
+            const dateStr = a.createdAt.toDate().toLocaleDateString();
+            byDay[dateStr] = (byDay[dateStr] || 0) + 1;
+          }
+        });
+        const sorted = Object.entries(byDay).map(([day, count]) => ({
+          date: day,
+          count,
+        }));
+        setTrendData(sorted);
+      }
+    );
+
+    return () => {
+      unsubUsers();
+      unsubFaculties();
+      unsubCourses();
+      unsubApplications();
+    };
   }, []);
 
   const COLORS = ["#3b82f6", "#06b6d4", "#a855f7", "#f59e0b"];
@@ -61,21 +119,30 @@ export default function AdminOverview() {
     <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-semibold">Welcome back, {user?.name ?? user?.displayName ?? "Admin"}</h1>
-        <p className="text-slate-400">{new Date().toLocaleString()}</p>
+        <div>
+          <h1 className="text-3xl font-semibold">
+            Welcome back, {user?.name ?? user?.displayName ?? "Admin"} 👋
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            {new Date().toLocaleString()}
+          </p>
+        </div>
+        <span className="px-4 py-1 bg-green-900/40 text-green-300 rounded-full text-sm">
+          System Operational ✅
+        </span>
       </div>
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {[
-          { label: "Total Users", value: metrics.totalUsers },
+          { label: "Total Users", value: metrics.users },
           { label: "Students", value: metrics.students },
-          { label: "Faculty", value: metrics.faculty },
-          { label: "Pending Admissions", value: metrics.admissions.pending },
+          { label: "Faculties", value: metrics.faculties },
+          { label: "Courses", value: metrics.courses },
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-slate-900 rounded-2xl p-5 shadow-md border border-slate-800"
+            className="bg-slate-900 rounded-2xl p-5 shadow-md border border-slate-800 hover:border-blue-500/40 transition"
             whileHover={{ scale: 1.03 }}
           >
             <p className="text-slate-400">{item.label}</p>
@@ -88,7 +155,7 @@ export default function AdminOverview() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-        {/* Role Distribution Pie Chart */}
+        {/* User Role Distribution */}
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="text-xl mb-4 font-semibold">User Role Distribution</h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -97,10 +164,11 @@ export default function AdminOverview() {
                 data={roleData}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
                 outerRadius={100}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
               >
                 {roleData.map((entry, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
@@ -112,15 +180,17 @@ export default function AdminOverview() {
           </ResponsiveContainer>
         </div>
 
-        {/* Admissions Status Bar Chart */}
+        {/* Application Status */}
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-          <h3 className="text-xl mb-4 font-semibold">Admissions Status</h3>
+          <h3 className="text-xl mb-4 font-semibold">Applications Overview</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={[
-              { name: "Admitted", value: metrics.admissions.admitted },
-              { name: "Waitlisted", value: metrics.admissions.waitlisted },
-              { name: "Pending", value: metrics.admissions.pending },
-            ]}>
+            <BarChart
+              data={[
+                { name: "Admitted", value: metrics.applications.admitted },
+                { name: "Pending", value: metrics.applications.pending },
+                { name: "Waitlisted", value: metrics.applications.waitlisted },
+              ]}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="name" stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" />
@@ -131,18 +201,58 @@ export default function AdminOverview() {
         </div>
       </div>
 
-      {/* Recent Activity Feed */}
+      {/* Application Trends */}
+      <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 mb-10">
+        <h3 className="text-xl mb-4 font-semibold">Application Trends (7 Days)</h3>
+        <ResponsiveContainer width="100%" height={250}>
+          <LineChart data={trendData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+            <XAxis dataKey="date" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="#06b6d4"
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Recent Applications */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
-        <h3 className="text-xl mb-4 font-semibold">Recent Activity</h3>
-        <ul className="space-y-2">
-          {activity.length > 0 ? (
-            activity.map((act, i) => (
-              <li key={i} className="text-slate-300 text-sm border-b border-slate-800 pb-2">
-                {act.description}
+        <h3 className="text-xl mb-4 font-semibold">Recent Applications</h3>
+        <ul className="space-y-3">
+          {recentApps.length > 0 ? (
+            recentApps.map((app, i) => (
+              <li
+                key={i}
+                className="text-slate-300 text-sm border-b border-slate-800 pb-2"
+              >
+                Student ID:{" "}
+                <span className="font-mono">{app.studentId}</span> –{" "}
+                <span
+                  className={`capitalize ${
+                    app.status === "admitted"
+                      ? "text-green-400"
+                      : app.status === "pending"
+                      ? "text-yellow-400"
+                      : "text-cyan-400"
+                  }`}
+                >
+                  {app.status}
+                </span>
+                <br />
+                <span className="text-slate-500 text-xs">
+                  {app.createdAt?.toDate?.().toLocaleString()}
+                </span>
               </li>
             ))
           ) : (
-            <p className="text-slate-500">No recent activity.</p>
+            <p className="text-slate-500">No recent applications yet.</p>
           )}
         </ul>
       </div>
