@@ -13,9 +13,14 @@ import {
 import {
   Home,
   Users,
+  Sparkles,
+  CalendarCheck,
   BookOpen,
   FileText,
+  BarChart3,
+  Settings,
   Clipboard,
+  Bell,
   Briefcase,
   CheckSquare,
 } from "lucide-react";
@@ -36,6 +41,7 @@ export function AppSidebar() {
       { name: "Admissions", path: "/dashboard/admin/admissions", icon: FileText },
       { name: "Manage Companies", path: "/dashboard/admin/companies", icon: Users },
       { name: "System Reports", path: "/dashboard/admin/reports", icon: FileText },
+      { name: "Analytics", path: "/dashboard/admin/stats", icon: FileText },
       { name: "Access Requests", path: "/dashboard/admin/access-requests", icon: FileText },
     ],
     
@@ -58,8 +64,14 @@ export function AppSidebar() {
     company: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
       { name: "Post Jobs", path: "/dashboard/company/jobs", icon: Briefcase },
+      { name: "Job Details", path: "/dashboard/company/jobs/:jobId", icon: FileText },
       { name: "View Applicants", path: "/dashboard/company/applicants", icon: Users },
+      { name: "Matched Candidates", path: "/dashboard/company/matches", icon: Sparkles },
+      { name: "Interviews", path: "/dashboard/company/interviews", icon: CalendarCheck },
+      { name: "Analytics", path: "/dashboard/company/analytics", icon: BarChart3 },
+      { name: "Notifications", path: "/dashboard/company/notifications", icon: Bell },
       { name: "Profile", path: "/dashboard/company/profile", icon: Clipboard },
+      { name: "Settings", path: "/dashboard/company/settings", icon: Settings },
     ],
   };
 

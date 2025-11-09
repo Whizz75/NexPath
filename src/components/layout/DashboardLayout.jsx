@@ -31,15 +31,22 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
+
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-navy text-slate-100 shadow-md">
+        {/* Sticky Header: keep original spacing & padding */}
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-slate-700 bg-navy/100 text-slate-100 shadow-md backdrop-blur-sm px-6 md:px-10">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4 border-slate-600" />
 
           <Breadcrumb className="flex-1">
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard" className="text-slate-100 hover:text-teal-400">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink
+                  href="/dashboard"
+                  className="text-slate-100 hover:text-teal-400"
+                >
+                  Dashboard
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block text-slate-400" />
               <BreadcrumbItem>
@@ -63,10 +70,10 @@ export default function DashboardLayout() {
           </div>
         </header>
 
+        {/* Main Content: offset by header height to prevent overlap */}
         <main className="flex flex-1 flex-col gap-6 p-6 md:p-10 bg-slate-900 overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-2xl shadow-inner">
           <Outlet />
         </main>
-
       </SidebarInset>
     </SidebarProvider>
   );
