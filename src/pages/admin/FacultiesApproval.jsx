@@ -24,7 +24,6 @@ export default function FacultiesApproval() {
     const unsubscribe = onSnapshot(collection(db, "faculties"), async (snapshot) => {
       const faculties = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-      // Group faculties by instituteId
       const grouped = faculties.reduce((acc, f) => {
         if (!acc[f.instituteId]) acc[f.instituteId] = [];
         acc[f.instituteId].push(f);
@@ -33,7 +32,6 @@ export default function FacultiesApproval() {
 
       setGroupedFaculties(grouped);
 
-      // Fetch institute names if not already fetched
       const instituteMap = {};
       for (const instituteId of Object.keys(grouped)) {
         if (!institutes[instituteId]) {
@@ -84,7 +82,6 @@ export default function FacultiesApproval() {
               </CardHeader>
 
               <CardContent className="space-y-6">
-                {/* Pending Section */}
                 <div>
                   <h3 className="text-primary font-semibold mb-2">Pending Approvals</h3>
                   {pending.length > 0 ? (
@@ -129,7 +126,6 @@ export default function FacultiesApproval() {
                   )}
                 </div>
 
-                {/* Past Section */}
                 <div>
                   <h3 className="text-muted-foreground font-semibold mb-2">
                     Past Decisions

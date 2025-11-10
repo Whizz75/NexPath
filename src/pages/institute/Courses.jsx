@@ -1,4 +1,3 @@
-// src/pages/institute/Courses.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -45,7 +44,6 @@ export default function Courses() {
 
   const gradeOptions = ["A", "B", "C", "D", "E", "F"];
 
-  // Fetch faculties and courses
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (!user) return;
@@ -142,8 +140,7 @@ export default function Courses() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold text-primary">Courses Management</h1>
 
-      {/* Add new course */}
-      <Card className="bg-card text-card-foreground border border-border shadow">
+      <Card className="bg-card border border-border shadow">
         <CardHeader>
           <CardTitle>Add New Course</CardTitle>
         </CardHeader>
@@ -170,60 +167,74 @@ export default function Courses() {
             onChange={(e) => setNewCourse({ ...newCourse, maxStudents: e.target.value })}
           />
 
-          {/* Minimum Subject Requirements */}
           <div className="border-t border-border pt-4">
-            <h3 className="text-lg font-semibold mb-2 text-primary">Minimum Subject Requirements</h3>
+            <h3 className="text-lg font-semibold mb-2 text-primary">
+              Minimum Subject Requirements
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Object.keys(newCourse.minRequirements).map((subject) => (
-                <div key={subject}>
+                <div key={subject} className="space-y-1">
                   <label className="text-sm text-muted-foreground">{subject}</label>
-                  <select
+                  <Select
                     value={newCourse.minRequirements[subject]}
-                    onChange={(e) =>
-                      handleMinRequirementChange(subject, e.target.value, setNewCourse)
+                    onValueChange={(v) =>
+                      handleMinRequirementChange(subject, v, setNewCourse)
                     }
-                    className="w-full mt-1 bg-muted text-foreground rounded-lg p-2 focus:ring-2 focus:ring-primary"
                   >
-                    <option value="">Select Grade</option>
-                    {gradeOptions.map((grade) => (
-                      <option key={grade} value={grade}>
-                        {grade}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Grade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {gradeOptions.map((grade) => (
+                        <SelectItem key={grade} value={grade}>
+                          {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               ))}
             </div>
           </div>
 
-          <Select
-            value={newCourse.facultyId}
-            onValueChange={(v) => setNewCourse({ ...newCourse, facultyId: v })}
-            disabled={approvedFaculties.length === 0}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Faculty" />
-            </SelectTrigger>
-            <SelectContent>
-              {approvedFaculties.length > 0
-                ? approvedFaculties.map((f) => (
+          <div>
+            <label className="text-sm text-muted-foreground">Faculty</label>
+            <Select
+              value={newCourse.facultyId}
+              onValueChange={(v) => setNewCourse({ ...newCourse, facultyId: v })}
+              disabled={approvedFaculties.length === 0}
+            >
+              <SelectTrigger className="w-full mt-1">
+                <SelectValue placeholder="Select Faculty" />
+              </SelectTrigger>
+              <SelectContent>
+                {approvedFaculties.length > 0 ? (
+                  approvedFaculties.map((f) => (
                     <SelectItem key={f.id} value={f.id}>
                       {f.name}
                     </SelectItem>
                   ))
-                : <SelectItem value="none" disabled>No approved faculties</SelectItem>}
-            </SelectContent>
-          </Select>
+                ) : (
+                  <SelectItem value="none" disabled>
+                    No approved faculties
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Button onClick={handleAddCourse} className="w-full" disabled={approvedFaculties.length === 0}>
+          <Button
+            onClick={handleAddCourse}
+            className="w-full"
+            disabled={approvedFaculties.length === 0}
+          >
             Add Course
           </Button>
         </CardContent>
       </Card>
 
-      {/* Courses grouped by faculty */}
       {approvedFaculties.map((fac) => (
-        <Card key={fac.id} className="bg-card text-card-foreground border border-border shadow">
+        <Card key={fac.id} className="bg-card border border-border shadow">
           <CardHeader>
             <CardTitle>{fac.name} - Courses</CardTitle>
           </CardHeader>
@@ -240,7 +251,9 @@ export default function Courses() {
                       <p className="font-semibold">
                         {c.name} ({c.code})
                       </p>
-                      <p className="text-sm text-muted-foreground">{c.description || "No description"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {c.description || "No description"}
+                      </p>
                       <p className="text-sm text-accent mt-1">
                         Max Students: {c.maxStudents || "Not set"}
                       </p>
@@ -280,7 +293,6 @@ export default function Courses() {
         </Card>
       ))}
 
-      {/* Edit Modal */}
       {modalCourse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card p-6 rounded-2xl w-full max-w-md shadow-lg space-y-4">
@@ -311,23 +323,28 @@ export default function Courses() {
 
             <div>
               <h3 className="text-sm font-semibold mb-2">Minimum Requirements</h3>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {Object.keys(modalCourse.minRequirements || {}).map((subject) => (
-                  <select
-                    key={subject}
-                    value={modalCourse.minRequirements[subject]}
-                    onChange={(e) =>
-                      handleMinRequirementChange(subject, e.target.value, setModalCourse)
-                    }
-                    className="bg-muted text-foreground rounded-lg p-2 text-sm"
-                  >
-                    <option value="">{subject}</option>
-                    {gradeOptions.map((grade) => (
-                      <option key={grade} value={grade}>
-                        {grade}
-                      </option>
-                    ))}
-                  </select>
+                  <div key={subject} className="space-y-1">
+                    <label className="text-xs text-muted-foreground">{subject}</label>
+                    <Select
+                      value={modalCourse.minRequirements[subject]}
+                      onValueChange={(v) =>
+                        handleMinRequirementChange(subject, v, setModalCourse)
+                      }
+                    >
+                      <SelectTrigger className="w-full text-sm">
+                        <SelectValue placeholder="Select Grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gradeOptions.map((grade) => (
+                          <SelectItem key={grade} value={grade}>
+                            {grade}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 ))}
               </div>
             </div>

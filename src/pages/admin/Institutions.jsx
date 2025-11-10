@@ -39,7 +39,7 @@ function SuspendDialog({ instId, onConfirm }) {
         <Button
           size="sm"
           variant="destructive"
-          onClick={() => setReason("")} // reset reason when opened
+          onClick={() => setReason("")}
         >
           Suspend
         </Button>
@@ -129,7 +129,6 @@ export default function Institutions() {
     return () => unsubscribe();
   }, []);
 
-  // 🔥 Update institution status + batch update users under it
   const updateStatus = async (id, status, reason = "") => {
     try {
       const instRef = doc(db, "institutes", id);
@@ -139,7 +138,6 @@ export default function Institutions() {
         updatedAt: serverTimestamp(),
       });
 
-      // Batch update all users tied to this institution
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("institutionId", "==", id));
       const usersSnap = await getDocs(q);
@@ -175,7 +173,6 @@ export default function Institutions() {
         updatedAt: serverTimestamp(),
       });
 
-      // Reactivate all users under this institution
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("institutionId", "==", id));
       const usersSnap = await getDocs(q);
@@ -208,7 +205,6 @@ export default function Institutions() {
 
   return (
     <div className="p-6 bg-slate-900 min-h-screen space-y-6">
-      {/* Pending Institutions */}
       <Card>
         <CardHeader>
           <CardTitle>Pending Institutions</CardTitle>
@@ -247,7 +243,6 @@ export default function Institutions() {
         </CardContent>
       </Card>
 
-      {/* Approved Institutions */}
       <Card>
         <CardHeader>
           <CardTitle>Approved Institutions</CardTitle>
@@ -279,7 +274,6 @@ export default function Institutions() {
         </CardContent>
       </Card>
 
-      {/* Suspended Institutions */}
       <Card>
         <CardHeader>
           <CardTitle>Suspended Institutions</CardTitle>

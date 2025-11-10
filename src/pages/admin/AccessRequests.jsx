@@ -3,7 +3,6 @@ import { db } from "@/lib/firebase";
 import {
   collection,
   query,
-  where,
   getDocs,
   updateDoc,
   doc,
@@ -11,8 +10,8 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 
 export default function AccessRequests() {
   const [requests, setRequests] = useState([]);
@@ -79,18 +78,17 @@ export default function AccessRequests() {
 
         <div className="flex gap-3">
           {["pending", "approved", "denied"].map((f) => (
-            <Button
+            <button
               key={f}
               onClick={() => setFilter(f)}
-              variant={filter === f ? "default" : "outline"}
-              className={`capitalize ${
+              className={`capitalize px-3 py-1 rounded ${
                 filter === f
                   ? "bg-primary text-white"
-                  : "bg-transparent border border-slate-600 text-slate-300 hover:bg-slate-800"
+                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
               }`}
             >
               {f}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
@@ -106,21 +104,21 @@ export default function AccessRequests() {
               key={req.id}
               className="bg-slate-900/60 border border-slate-800 hover:border-primary/50 transition-all"
             >
-              <CardHeader>
-                <CardTitle className="text-lg font-medium flex justify-between">
+              <CardHeader className="flex justify-between items-center">
+                <CardTitle className="text-lg font-medium flex-1">
                   {req.name || "Unnamed User"}
-                  <span
-                    className={`text-xs font-semibold uppercase px-2 py-1 rounded ${
-                      req.status === "approved"
-                        ? "bg-green-600/20 text-green-400"
-                        : req.status === "denied"
-                        ? "bg-red-600/20 text-red-400"
-                        : "bg-yellow-600/20 text-yellow-400"
-                    }`}
-                  >
-                    {req.status}
-                  </span>
                 </CardTitle>
+                <span
+                  className={`text-xs font-semibold uppercase px-2 py-1 rounded ${
+                    req.status === "approved"
+                      ? "bg-green-600/20 text-green-400"
+                      : req.status === "denied"
+                      ? "bg-red-600/20 text-red-400"
+                      : "bg-yellow-600/20 text-yellow-400"
+                  }`}
+                >
+                  {req.status}
+                </span>
               </CardHeader>
 
               <CardContent className="space-y-2 text-sm">
@@ -139,24 +137,29 @@ export default function AccessRequests() {
                     : "-"}
                 </p>
 
-                {filter === "pending" && (
-                  <div className="flex gap-2 pt-3">
-                    <Button
-                      onClick={() => handleAction(req.id, "approved")}
-                      disabled={actionLoading === req.id}
-                      className="bg-green-600 hover:bg-green-700 flex-1"
-                    >
-                      {actionLoading === req.id ? "Processing..." : "Approve"}
-                    </Button>
-                    <Button
-                      onClick={() => handleAction(req.id, "denied")}
-                      disabled={actionLoading === req.id}
-                      className="bg-red-600 hover:bg-red-700 flex-1"
-                    >
-                      {actionLoading === req.id ? "Processing..." : "Deny"}
-                    </Button>
-                  </div>
-                )}
+                <div className="flex gap-3 pt-3 justify-center">
+                  <CheckCircle
+                    size={24}
+                    className={`cursor-pointer ${
+                      req.status === "approved" ? "text-green-400" : "text-slate-400 hover:text-green-400"
+                    }`}
+                    onClick={() => handleAction(req.id, "approved")}
+                  />
+                  <XCircle
+                    size={24}
+                    className={`cursor-pointer ${
+                      req.status === "denied" ? "text-red-400" : "text-slate-400 hover:text-red-400"
+                    }`}
+                    onClick={() => handleAction(req.id, "denied")}
+                  />
+                  <Clock
+                    size={24}
+                    className={`cursor-pointer ${
+                      req.status === "pending" ? "text-yellow-400" : "text-slate-400 hover:text-yellow-400"
+                    }`}
+                    onClick={() => handleAction(req.id, "pending")}
+                  />
+                </div>
               </CardContent>
             </Card>
           ))}

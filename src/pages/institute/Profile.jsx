@@ -31,7 +31,6 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [isNew, setIsNew] = useState(false);
 
-  // Load institute data and user info
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged(async (u) => {
       if (!u) return;
@@ -53,7 +52,6 @@ export default function Profile() {
         setEditing(true);
       }
 
-      // Count faculties and courses belonging to this institute
       const facSnap = await getDocs(
         query(collection(db, "faculties"), where("instituteId", "==", u.uid))
       );
@@ -68,7 +66,6 @@ export default function Profile() {
     return () => unsubscribeAuth();
   }, []);
 
-  // Save or create institute profile
   const handleSave = async () => {
     if (!form.name.trim() || !form.email.trim()) {
       alert("Name and email are required!");
@@ -80,7 +77,6 @@ export default function Profile() {
       const instRef = doc(db, "institutes", user.uid);
 
       if (isNew) {
-        // Create a new institute record
         await setDoc(instRef, {
           ...form,
           createdAt: serverTimestamp(),
@@ -88,7 +84,6 @@ export default function Profile() {
           updateRequested: true,
         });
 
-        // 🔗 Link this user to the institute
         await updateDoc(doc(db, "users", user.uid), {
           institutionId: user.uid,
           updatedAt: serverTimestamp(),
@@ -96,7 +91,6 @@ export default function Profile() {
 
         setIsNew(false);
       } else {
-        // Update existing institute info
         await updateDoc(instRef, {
           ...form,
           status: "pending",
@@ -130,7 +124,6 @@ export default function Profile() {
       </h1>
 
       <Card className="bg-card text-card-foreground border border-border shadow relative">
-        {/* Edit Icon */}
         {!editing && (
           <div
             className="absolute top-4 right-4 cursor-pointer"
@@ -221,8 +214,8 @@ export default function Profile() {
               <p>
                 <span className="font-semibold">Profile Status:</span>{" "}
                 {institute?.status === "approved"
-                  ? "✅ Approved"
-                  : "⏳ Pending Approval"}
+                  ? "Approved"
+                  : "Pending Approval"}
               </p>
             </div>
           )}

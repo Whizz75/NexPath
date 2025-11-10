@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { db, auth } from "@/lib/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RequestAccess() {
@@ -26,16 +32,14 @@ export default function RequestAccess() {
 
     setLoading(true);
     try {
-      // --- Create Firebase Auth user ---
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // --- Create Firestore doc with pending status ---
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         name,
         email,
-        role: type, // requested role
+        role: type,
         status: "pending",
         createdAt: serverTimestamp(),
       });
@@ -56,8 +60,18 @@ export default function RequestAccess() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6">
-      <Card className="w-full max-w-md shadow-lg bg-slate-900 text-slate-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 p-6">
+      <div className="flex items-center justify-center gap-3 mb-6">
+        <img
+          src="/logo.png"
+          alt="NexPath Logo"
+          className="w-12 h-12"
+        />
+        <h1 className="text-3xl font-bold text-slate-100">NexPath</h1>
+      </div>
+
+
+      <Card className="w-full max-w-md shadow-xl bg-slate-900 text-slate-100 border border-slate-800">
         <CardHeader>
           <CardTitle className="text-center text-xl">Request Access</CardTitle>
         </CardHeader>
@@ -92,10 +106,24 @@ export default function RequestAccess() {
                 <SelectItem value="company">Company</SelectItem>
               </SelectContent>
             </Select>
-            {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
+
+            {message && (
+              <p className="text-center text-sm text-muted-foreground">{message}</p>
+            )}
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Submitting..." : "Submit Request"}
             </Button>
+
+            <p className="text-center text-sm text-muted-foreground mt-2">
+              Already have an account?{" "}
+              <Link
+                to="/auth/login"
+                className="text-teal-400 hover:underline"
+              >
+                Log in
+              </Link>
+            </p>
           </form>
         </CardContent>
       </Card>

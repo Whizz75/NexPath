@@ -1,4 +1,3 @@
-// src/pages/admin/Admissions.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
@@ -113,7 +112,6 @@ export default function Admissions() {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold text-primary mb-6">Admissions Dashboard</h1>
 
-      {/* Institution Navigation */}
       <div className="flex justify-between items-center mb-4">
         <Button
           onClick={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
@@ -130,7 +128,6 @@ export default function Admissions() {
         </Button>
       </div>
 
-      {/* Summary cards */}
       <div className="grid md:grid-cols-3 gap-4 mb-6">
         <div className="bg-slate-800 text-slate-100 shadow rounded-xl p-6 text-center">
           <p className="text-slate-400">Total Applications</p>
@@ -146,7 +143,6 @@ export default function Admissions() {
         </div>
       </div>
 
-      {/* Bar chart */}
       <div className="bg-slate-800 text-slate-100 shadow rounded-xl p-6">
         <h2 className="text-xl font-semibold mb-4">Applications by Faculty</h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -167,7 +163,6 @@ export default function Admissions() {
         </ResponsiveContainer>
       </div>
 
-      {/* Faculty breakdown */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {currentInstitution?.chartData.map((f) => (
           <div key={f.faculty} className="bg-slate-800 text-slate-100 shadow rounded-xl p-4">

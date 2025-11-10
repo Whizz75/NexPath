@@ -1,4 +1,3 @@
-// src/pages/student/Admissions.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
@@ -17,25 +16,21 @@ export default function Admissions() {
       if (!user) return;
       setUserId(user.uid);
 
-      // Load all institutions
       const instSnap = await getDocs(collection(db, "institutes"));
       const instData = {};
       instSnap.docs.forEach((d) => (instData[d.id] = d.data()));
       setInstitutions(instData);
 
-      // Load all faculties
       const facSnap = await getDocs(collection(db, "faculties"));
       const facData = {};
       facSnap.docs.forEach((d) => (facData[d.id] = d.data()));
       setFaculties(facData);
 
-      // Load all courses
       const courseSnap = await getDocs(collection(db, "courses"));
       const courseData = {};
       courseSnap.docs.forEach((d) => (courseData[d.id] = d.data()));
       setCourses(courseData);
 
-      // Load student applications
       const appSnap = await getDocs(
         query(collection(db, "applications"), where("studentId", "==", user.uid))
       );

@@ -1,4 +1,3 @@
-// src/pages/institute/Faculties.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -51,7 +50,6 @@ export default function Faculties() {
     return () => unsubscribeAuth();
   }, []);
 
-  // Fetch courses for each faculty
   useEffect(() => {
     faculties.forEach((faculty) => {
       const q = query(collection(db, "courses"), where("facultyId", "==", faculty.id));
@@ -116,7 +114,6 @@ export default function Faculties() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Form */}
       <div className="bg-card text-card-foreground rounded-2xl p-6 shadow-md">
         <h1 className="text-2xl font-semibold mb-4 text-primary">
           Faculties Management
@@ -155,7 +152,6 @@ export default function Faculties() {
         </div>
       </div>
 
-      {/* Faculties List */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {faculties.length > 0 ? (
           faculties.map((faculty) => (
@@ -207,7 +203,6 @@ export default function Faculties() {
                   </Button>
                 </div>
 
-                {/* Inline Courses */}
                 <div className="mt-4 border-t border-border pt-3">
                   <p className="text-sm font-semibold mb-2 text-primary">
                     Courses

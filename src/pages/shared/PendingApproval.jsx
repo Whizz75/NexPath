@@ -1,4 +1,3 @@
-// src/pages/shared/PendingApproval.jsx
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 

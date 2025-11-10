@@ -38,17 +38,14 @@ export default function Apply() {
       setUserId(user.uid);
 
       try {
-        // Student profile
         const profileRef = doc(db, "students", user.uid);
         const profileSnap = await getDoc(profileRef);
         if (profileSnap.exists()) setStudentProfile(profileSnap.data());
 
-        // Applications
         const appsQuery = query(collection(db, "applications"), where("studentId", "==", user.uid));
         const appsSnap = await getDocs(appsQuery);
         setApplications(appsSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
 
-        // Institutes
         const instSnap = await getDocs(collection(db, "institutes"));
         setInstitutes(instSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
       } catch (err) {
@@ -107,13 +104,11 @@ export default function Apply() {
     const studentResults = studentProfile?.results;
     const minReqs = course.minRequirements;
 
-    // Requirement check
     if (!compareResults(studentResults, minReqs)) {
       toast.error("You don't meet the minimum requirements for this course.");
       return;
     }
 
-    // Max 2 per institute
     const appliedInInstitute = applications.filter(
       (a) => a.instituteId === course.instituteId
     );
@@ -122,7 +117,6 @@ export default function Apply() {
       return;
     }
 
-    // Check duplicate
     if (applications.some((a) => a.courseId === course.id)) {
       toast.error("You have already applied for this course.");
       return;
@@ -180,7 +174,6 @@ export default function Apply() {
     <div className="min-h-screen bg-navy text-slate-100 p-6">
       <h1 className="text-3xl font-bold text-center mb-8">Apply for Courses</h1>
 
-      {/* Institute + Faculty Select */}
       <div className="flex flex-col md:flex-row justify-center gap-4 mb-8">
         <Select onValueChange={(v) => loadFaculties(v)}>
           <SelectTrigger className="bg-slate-800 border-slate-700 w-64">
@@ -209,7 +202,6 @@ export default function Apply() {
         </Select>
       </div>
 
-      {/* Courses Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.length > 0 ? (
           courses.map((course) => {

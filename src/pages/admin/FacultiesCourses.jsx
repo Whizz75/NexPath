@@ -1,4 +1,3 @@
-// src/pages/admin/FacultiesCourses.jsx
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import {
@@ -16,9 +15,9 @@ export default function FacultiesCourses() {
   const [institutes, setInstitutes] = useState([]);
   const [faculties, setFaculties] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [editingCourseId, setEditingCourseId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load all data live
   useEffect(() => {
     const unsubInst = onSnapshot(collection(db, "institutes"), (snap) => {
       setInstitutes(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -43,14 +42,13 @@ export default function FacultiesCourses() {
   const updateStatus = async (id, newStatus) => {
     await updateDoc(doc(db, "courses", id), { status: newStatus });
     toast.success(
-      `Course ${newStatus === "approved" ? "approved ✅" : "rejected ❌"}`
+      `Course ${newStatus === "approved" ? "approved" : "rejected"}`
     );
+    setEditingCourseId(null);
   };
 
   const handleEdit = (course) => {
-    // Placeholder for edit modal
-    console.log("Edit course:", course);
-    toast.info(`Edit mode for ${course.name} coming soon`);
+    setEditingCourseId(course.id);
   };
 
   if (loading)
@@ -99,29 +97,15 @@ export default function FacultiesCourses() {
                           <h2 className="font-semibold text-lg">
                             Faculty: {fac.name}
                           </h2>
-                          <p className="text-sm text-muted-foreground">
-                            Status:{" "}
-                            <span
-                              className={`font-medium ${
-                                fac.status === "approved"
-                                  ? "text-green-500"
-                                  : fac.status === "rejected"
-                                  ? "text-red-500"
-                                  : "text-yellow-500"
-                              }`}
-                            >
-                              {fac.status || "pending"}
-                            </span>
-                          </p>
                         </div>
                       </div>
 
-                      {/* Courses under this faculty */}
                       <div className="ml-4 space-y-2">
                         {facCourses.length > 0 ? (
                           facCourses.map((course) => {
                             const approved = course.status === "approved";
                             const rejected = course.status === "rejected";
+                            const editing = editingCourseId === course.id;
 
                             return (
                               <div
@@ -152,38 +136,46 @@ export default function FacultiesCourses() {
                                 </div>
 
                                 <div className="flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-green-500 border-green-500 hover:bg-green-500/10 disabled:opacity-50"
-                                    disabled={approved || rejected}
-                                    onClick={() =>
-                                      updateStatus(course.id, "approved")
-                                    }
-                                  >
-                                    Approve
-                                  </Button>
-
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-red-500 border-red-500 hover:bg-red-500/10 disabled:opacity-50"
-                                    disabled={approved || rejected}
-                                    onClick={() =>
-                                      updateStatus(course.id, "rejected")
-                                    }
-                                  >
-                                    Reject
-                                  </Button>
-
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-blue-500 border-blue-500 hover:bg-blue-500/10"
-                                    onClick={() => handleEdit(course)}
-                                  >
-                                    Edit
-                                  </Button>
+                                  {editing ? (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-green-500 border-green-500 hover:bg-green-500/10"
+                                        onClick={() =>
+                                          updateStatus(course.id, "approved")
+                                        }
+                                      >
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-red-500 border-red-500 hover:bg-red-500/10"
+                                        onClick={() =>
+                                          updateStatus(course.id, "rejected")
+                                        }
+                                      >
+                                        Reject
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setEditingCourseId(null)}
+                                      >
+                                        Cancel
+                                      </Button>
+                                    </>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-blue-500 border-blue-500 hover:bg-blue-500/10"
+                                      onClick={() => handleEdit(course)}
+                                    >
+                                      Edit
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             );

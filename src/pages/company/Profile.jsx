@@ -1,4 +1,3 @@
-// src/pages/company/Profile.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -53,7 +52,6 @@ export default function CompanyProfile() {
         setEditing(true);
       }
 
-      // Count jobs and applicants
       const jobsSnap = await getDocs(
         query(collection(db, "jobs"), where("companyId", "==", u.uid))
       );

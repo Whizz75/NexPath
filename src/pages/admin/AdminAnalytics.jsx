@@ -1,4 +1,3 @@
-// src/pages/admin/AdminAnalytics.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import {
@@ -49,7 +48,6 @@ export default function AdminAnalytics() {
       const faculties = facultiesSnap.docs.map((d) => d.data());
       const courses = coursesSnap.docs.map((d) => d.data());
 
-      // --- User Growth (by date)
       const growthMap = {};
       users.forEach((u) => {
         if (u.createdAt) {
@@ -62,7 +60,6 @@ export default function AdminAnalytics() {
         count,
       }));
 
-      // --- Application Trends
       const appTrendMap = {};
       apps.forEach((a) => {
         if (a.createdAt) {
@@ -75,7 +72,6 @@ export default function AdminAnalytics() {
       });
       const trendData = Object.values(appTrendMap);
 
-      // --- Faculty-Course Data
       const facultyMap = {};
       courses.forEach((c) => {
         facultyMap[c.facultyId] = (facultyMap[c.facultyId] || 0) + 1;
@@ -85,7 +81,6 @@ export default function AdminAnalytics() {
         courses: facultyMap[f.instituteId] || 0,
       }));
 
-      // --- Summary
       const admittedCount = apps.filter((a) => a.status === "admitted").length;
       const admittedRate = apps.length ? ((admittedCount / apps.length) * 100).toFixed(1) : 0;
       setSummary({
@@ -107,16 +102,14 @@ export default function AdminAnalytics() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
-      {/* Header */}
       <div className="flex justify-between items-center mb-10">
         <div>
           <h1 className="text-3xl font-semibold">Analytics & Insights</h1>
-          <p className="text-slate-400">Welcome back, {user?.name ?? "Admin"}</p>
+          <p className="text-slate-400">Welcome back, {user?.name ?? user?.displayName ?? "Admin"}</p>
         </div>
         <p className="text-slate-400">{new Date().toLocaleString()}</p>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {[
           { label: "New Users", value: summary.newUsers },
@@ -137,9 +130,7 @@ export default function AdminAnalytics() {
         ))}
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-        {/* User Growth */}
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="text-xl font-semibold mb-4">User Growth Over Time</h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -154,7 +145,6 @@ export default function AdminAnalytics() {
           </ResponsiveContainer>
         </div>
 
-        {/* Application Trends */}
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="text-xl font-semibold mb-4">Application Trends</h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -172,7 +162,6 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      {/* Faculty-Course Breakdown */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <h3 className="text-xl font-semibold mb-4">Courses per Faculty</h3>
         <ResponsiveContainer width="100%" height={300}>

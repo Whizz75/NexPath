@@ -1,4 +1,3 @@
-// src/pages/institute/Admissions.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -23,7 +22,6 @@ export default function Admissions() {
       if (!user) return;
       setInstituteId(user.uid);
 
-      // Load faculties
       const facSnap = await getDocs(
         query(
           collection(db, "faculties"),
@@ -34,7 +32,6 @@ export default function Admissions() {
       const facData = facSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setFaculties(facData);
 
-      // Load courses under those faculties
       const courseIds = [];
       const coursesData = {};
       await Promise.all(
@@ -52,7 +49,6 @@ export default function Admissions() {
         })
       );
 
-      // Load applications for those courses
       let allApps = [];
       if (courseIds.length > 0) {
         const appSnap = await getDocs(
@@ -61,7 +57,6 @@ export default function Admissions() {
         allApps = appSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
       }
 
-      // Filter: only show admitted or waitlisted if not admitted
       const filteredApps = [];
       const seenStudents = new Set();
       allApps.forEach((app) => {
@@ -70,7 +65,6 @@ export default function Admissions() {
             filteredApps.push(app);
             seenStudents.add(app.studentId);
           } else if (app.status === "waitlisted") {
-            // add waitlisted only if student has no admitted yet
             const hasAdmitted = allApps.some(
               (a) => a.studentId === app.studentId && a.status === "admitted"
             );
@@ -84,7 +78,6 @@ export default function Admissions() {
 
       setApplications(filteredApps);
 
-      // Load student profiles
       const studentIds = [...new Set(filteredApps.map((a) => a.studentId))];
       const studentData = {};
       await Promise.all(

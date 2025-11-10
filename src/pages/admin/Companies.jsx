@@ -1,4 +1,3 @@
-// src/pages/admin/Companies.jsx
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import {
@@ -179,7 +178,6 @@ export default function Companies() {
 
   return (
     <div className="p-6 bg-slate-900 min-h-screen space-y-6">
-      {/* Pending Companies */}
       <Card>
         <CardHeader>
           <CardTitle>Pending Companies</CardTitle>
@@ -218,7 +216,6 @@ export default function Companies() {
         </CardContent>
       </Card>
 
-      {/* Approved Companies */}
       <Card>
         <CardHeader>
           <CardTitle>Approved Companies</CardTitle>
@@ -247,7 +244,6 @@ export default function Companies() {
         </CardContent>
       </Card>
 
-      {/* Suspended Companies */}
       <Card>
         <CardHeader>
           <CardTitle>Suspended Companies</CardTitle>

@@ -1,4 +1,3 @@
-// src/pages/institute/Applications.jsx
 import { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -26,14 +25,12 @@ export default function Applications() {
       if (!user) return;
       setInstituteId(user.uid);
 
-      // Load courses
       const coursesSnap = await getDocs(
         query(collection(db, "courses"), where("instituteId", "==", user.uid))
       );
       const coursesData = coursesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setCourses(coursesData);
 
-      // Load faculties
       const facIds = [...new Set(coursesData.map((c) => c.facultyId))];
       let facultiesData = [];
       for (let fid of facIds) {
@@ -44,7 +41,6 @@ export default function Applications() {
       }
       setFaculties(facultiesData);
 
-      // Load applications for all courses
       let apps = [];
       for (let course of coursesData) {
         const appSnap = await getDocs(
@@ -54,7 +50,6 @@ export default function Applications() {
       }
       setApplications(apps);
 
-      // Load student info
       const studentIds = [...new Set(apps.map((a) => a.studentId))];
       let studentsData = [];
       for (let sid of studentIds) {
@@ -80,7 +75,6 @@ export default function Applications() {
 
     await updateDoc(doc(db, "applications", appId), { status });
 
-    // Automatically reject other applications of the student if admitted
     if (status === "admitted") {
       const otherApps = applications.filter(
         (a) =>

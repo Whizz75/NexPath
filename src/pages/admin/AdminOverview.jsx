@@ -1,4 +1,3 @@
-// src/pages/admin/AdminOverview.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import {
@@ -41,7 +40,6 @@ export default function AdminOverview() {
   const [trendData, setTrendData] = useState([]);
 
   useEffect(() => {
-    // Real-time listeners
     const unsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
       const users = snapshot.docs.map((d) => d.data());
       const roleCounts = users.reduce((acc, u) => {
@@ -86,10 +84,8 @@ export default function AdminOverview() {
           },
         }));
 
-        // Top 5 recent
         setRecentApps(apps.slice(0, 5));
 
-        // Prepare trend data (count apps by day)
         const byDay = {};
         apps.forEach((a) => {
           if (a.createdAt?.toDate) {
@@ -117,22 +113,20 @@ export default function AdminOverview() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-semibold">
-            Welcome back, {user?.name ?? user?.displayName ?? "Admin"} 👋
+            Welcome back, {user?.name ?? user?.displayName ?? "Admin"}
           </h1>
           <p className="text-slate-400 text-sm mt-1">
             {new Date().toLocaleString()}
           </p>
         </div>
         <span className="px-4 py-1 bg-green-900/40 text-green-300 rounded-full text-sm">
-          System Operational ✅
+          System Operational
         </span>
       </div>
 
-      {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {[
           { label: "Total Users", value: metrics.users },
@@ -153,9 +147,7 @@ export default function AdminOverview() {
         ))}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
-        {/* User Role Distribution */}
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="text-xl mb-4 font-semibold">User Role Distribution</h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -180,7 +172,6 @@ export default function AdminOverview() {
           </ResponsiveContainer>
         </div>
 
-        {/* Application Status */}
         <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
           <h3 className="text-xl mb-4 font-semibold">Applications Overview</h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -201,7 +192,6 @@ export default function AdminOverview() {
         </div>
       </div>
 
-      {/* Application Trends */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 mb-10">
         <h3 className="text-xl mb-4 font-semibold">Application Trends (7 Days)</h3>
         <ResponsiveContainer width="100%" height={250}>
@@ -222,7 +212,6 @@ export default function AdminOverview() {
         </ResponsiveContainer>
       </div>
 
-      {/* Recent Applications */}
       <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800">
         <h3 className="text-xl mb-4 font-semibold">Recent Applications</h3>
         <ul className="space-y-3">

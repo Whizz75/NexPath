@@ -2,20 +2,18 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import {
   GraduationCap,
   Users,
   Building2,
   ShieldCheck,
-  Settings,
-  BookOpen,
   FileText,
-  ClipboardList,
+  CheckSquare,
   Briefcase,
-  CalendarCheck,
-  BarChart3,
+  BookOpen,
   Bell,
+  BarChart3,
+  CircleUserRound,
 } from "lucide-react";
 
 export default function DashboardHome() {
@@ -30,26 +28,22 @@ export default function DashboardHome() {
     );
   }
 
-  // Role-based dashboard links (4 main pages per role)
   const getLinks = () => {
     switch (role) {
       case "admin":
         return [
           { label: "Access Requests", icon: ShieldCheck, path: "/dashboard/admin/access-requests" },
           { label: "Institutions", icon: Building2, path: "/dashboard/admin/institutions" },
-          { label: "Companies", icon: Briefcase, path: "/dashboard/admin/companies" },
-          { label: "Reports", icon: FileText, path: "/dashboard/admin/reports" },
+          { label: "Analytics", icon: BarChart3, path: "/dashboard/admin/stats" },
         ];
       case "institute":
         return [
-          { label: "Profile", icon: Building2, path: "/dashboard/institute/profile" },
-          { label: "Faculties", icon: Users, path: "/dashboard/institute/faculties" },
+          { label: "Profile", icon: CircleUserRound, path: "/dashboard/institute/profile" },
           { label: "Courses", icon: BookOpen, path: "/dashboard/institute/courses" },
-          { label: "Admissions", icon: ClipboardList, path: "/dashboard/institute/admissions" },
+          { label: "Admissions", icon: CheckSquare, path: "/dashboard/institute/admissions" },
         ];
       case "student":
         return [
-          { label: "Apply", icon: BookOpen, path: "/dashboard/student/apply" },
           { label: "Admissions", icon: GraduationCap, path: "/dashboard/student/admissions" },
           { label: "Jobs", icon: Briefcase, path: "/dashboard/student/jobs" },
           { label: "Notifications", icon: Bell, path: "/dashboard/student/notifications" },
@@ -58,12 +52,11 @@ export default function DashboardHome() {
         return [
           { label: "Job Posts", icon: Briefcase, path: "/dashboard/company/jobs" },
           { label: "Applicants", icon: Users, path: "/dashboard/company/applicants" },
-          { label: "Matched Candidates", icon: FileText, path: "/dashboard/company/matches" },
-          { label: "Interviews", icon: CalendarCheck, path: "/dashboard/company/interviews" },
+          { label: "Analytics", icon: BarChart3, path: "/dashboard/company/analytics" },
         ];
       default:
         return [
-          { label: "Get Started", icon: FileText, path: "/request-access" },
+          { label: "Get Started", icon: FileText, path: "/auth/request-access" },
         ];
     }
   };
@@ -72,7 +65,6 @@ export default function DashboardHome() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden text-slate-100">
-      {/* Background video */}
       <video
         autoPlay
         loop
@@ -83,10 +75,8 @@ export default function DashboardHome() {
         <source src="/loop.mp4" type="video/mp4" />
       </video>
 
-      {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 to-slate-950/90 backdrop-blur-sm" />
 
-      {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -106,7 +96,6 @@ export default function DashboardHome() {
           You’re logged in as <span className="font-semibold text-primary">{role?.toUpperCase() ?? "GUEST"}</span>
         </motion.p>
 
-        {/* Quick Links */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
