@@ -1,4 +1,3 @@
-// src/components/layout/AppSidebar.jsx
 import React from "react";
 import {
   Sidebar,
@@ -13,16 +12,20 @@ import {
 import {
   Home,
   Users,
-  Sparkles,
+  ShieldCheck,
   CalendarCheck,
   BookOpen,
   FileText,
   BarChart3,
-  Settings,
+  GraduationCap,
+  Building2,
   Clipboard,
   Bell,
   Briefcase,
   CheckSquare,
+  ChartNoAxesColumnIncreasing,
+  BookMarked,
+  CircleUserRound,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext.jsx";
 import { Link, useLocation } from "react-router-dom";
@@ -34,44 +37,40 @@ export function AppSidebar() {
   const roleLinks = {
     admin: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
-      { name: "Overview", path: "/dashboard/admin/overview", icon: BookOpen },
-      { name: "Manage Institutions", path: "/dashboard/admin/institutions", icon: BookOpen },
-      { name: "Faculties & Courses", path: "/dashboard/admin/faculties", icon: Clipboard },
-      { name: "Faculty Requests", path: "/dashboard/admin/faculty-requests", icon: FileText },
+      { name: "Overview", path: "/dashboard/admin/overview", icon: ChartNoAxesColumnIncreasing },
+      { name: "Manage Institutions", path: "/dashboard/admin/institutions", icon: GraduationCap },
+      { name: "Institute Courses", path: "/dashboard/admin/faculties", icon: BookOpen },
+      { name: "Faculty Requests", path: "/dashboard/admin/faculty-requests", icon: BookMarked },
       { name: "Admissions", path: "/dashboard/admin/admissions", icon: FileText },
-      { name: "Manage Companies", path: "/dashboard/admin/companies", icon: Users },
-      { name: "System Reports", path: "/dashboard/admin/reports", icon: FileText },
-      { name: "Analytics", path: "/dashboard/admin/stats", icon: FileText },
-      { name: "Access Requests", path: "/dashboard/admin/access-requests", icon: FileText },
+      { name: "Manage Companies", path: "/dashboard/admin/companies", icon: Building2 },
+      { name: "Analytics", path: "/dashboard/admin/stats", icon: BarChart3 },
+      { name: "Access Requests", path: "/dashboard/admin/access-requests", icon: ShieldCheck },
     ],
     
     institute: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
-      { name: "Manage Faculties", path: "/dashboard/institute/faculties", icon: BookOpen },
-      { name: "Manage Courses", path: "/dashboard/institute/courses", icon: Clipboard },
+      { name: "Manage Faculties", path: "/dashboard/institute/faculties", icon: BookMarked },
+      { name: "Manage Courses", path: "/dashboard/institute/courses", icon: BookOpen },
       { name: "Student Applications", path: "/dashboard/institute/applications", icon: FileText },
       { name: "Admissions", path: "/dashboard/institute/admissions", icon: CheckSquare },
-      { name: "Profile", path: "/dashboard/institute/profile", icon: Users },
+      { name: "Profile", path: "/dashboard/institute/profile", icon: CircleUserRound },
     ],
     student: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
       { name: "Apply for Courses", path: "/dashboard/student/apply", icon: BookOpen },
-      { name: "Admissions Results", path: "/dashboard/student/admissions", icon: FileText },
-      { name: "Profile & Documents", path: "/dashboard/student/profile", icon: Clipboard },
+      { name: "Admissions Results", path: "/dashboard/student/admissions", icon: GraduationCap },
+      { name: "Profile & Documents", path: "/dashboard/student/profile", icon: CircleUserRound },
       { name: "Job Postings", path: "/dashboard/student/jobs", icon: Briefcase },
-      { name: "Notifications", path: "/dashboard/student/notifications", icon: Users },
+      { name: "Notifications", path: "/dashboard/student/notifications", icon: Bell },
     ],
     company: [
       { name: "Dashboard", path: "/dashboard", icon: Home },
       { name: "Post Jobs", path: "/dashboard/company/jobs", icon: Briefcase },
-      { name: "Job Details", path: "/dashboard/company/jobs/:jobId", icon: FileText },
       { name: "View Applicants", path: "/dashboard/company/applicants", icon: Users },
-      { name: "Matched Candidates", path: "/dashboard/company/matches", icon: Sparkles },
       { name: "Interviews", path: "/dashboard/company/interviews", icon: CalendarCheck },
       { name: "Analytics", path: "/dashboard/company/analytics", icon: BarChart3 },
       { name: "Notifications", path: "/dashboard/company/notifications", icon: Bell },
-      { name: "Profile", path: "/dashboard/company/profile", icon: Clipboard },
-      { name: "Settings", path: "/dashboard/company/settings", icon: Settings },
+      { name: "Profile", path: "/dashboard/company/profile", icon: CircleUserRound },
     ],
   };
 

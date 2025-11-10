@@ -1,4 +1,3 @@
-// src/components/SignupForm.jsx
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +33,6 @@ export function SignupForm({ className, ...props }) {
 
     try {
       await signupWithEmail(email, password, name);
-      // redirect handled in AuthContext
     } catch (err) {
       setError(err.message);
     }
@@ -46,7 +44,6 @@ export function SignupForm({ className, ...props }) {
     try {
       setLoading(true);
       await loginWithGoogle(); 
-      // redirect handled in AuthContext after onAuthStateChanged
     } catch (err) {
       setError(err.message);
     }
@@ -56,12 +53,20 @@ export function SignupForm({ className, ...props }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-6 items-center justify-center min-h-screen bg-background p-4",
+        "flex flex-col gap-6 items-center justify-center min-h-screen bg-slate-950 p-4",
         className
       )}
       {...props}
     >
-      <Card className="w-[450px] max-w-md shadow-xl border border-border rounded-xl">
+      <div className="flex items-center justify-center gap-3 mb-6">
+        <img
+          src="/logo.png"
+          alt="NexPath Logo"
+          className="w-12 h-12"
+        />
+        <h1 className="text-3xl font-bold text-slate-100">NexPath</h1>
+      </div>
+      <Card className="w-[450px] max-w-md bg-slate-900 shadow-xl border border-border rounded-xl">
         <CardHeader>
           <CardTitle className="text-teal-400 text-[1.1em]">Create an account</CardTitle>
         </CardHeader>
@@ -126,6 +131,13 @@ export function SignupForm({ className, ...props }) {
                 Already have an account?{" "}
                 <Link to="/auth/login" className="text-teal-400 hover:underline">
                   Log in
+                </Link>
+              </FieldDescription>
+
+              <FieldDescription className="text-center text-slate-400 mt-2">
+                Are You A Company/Institute?{" "}
+                <Link to="/auth/request-access" className="text-teal-400 hover:underline">
+                  Request Access
                 </Link>
               </FieldDescription>
             </FieldGroup>

@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import {
@@ -21,7 +20,6 @@ export function AuthProvider({ children }) {
   const [initialLoad, setInitialLoad] = useState(true);
   const navigate = useNavigate();
 
-  // Handles redirection logic
   const redirectUser = (userData) => {
     if (!userData) return navigate("/auth/login");
 
@@ -36,7 +34,6 @@ export function AuthProvider({ children }) {
     navigate("/auth/login");
   };
 
-  // Watches auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
@@ -56,7 +53,6 @@ export function AuthProvider({ children }) {
         if (userSnap.exists()) {
           userData = userSnap.data();
 
-          // Check institution status if user belongs to one
           if (userData.institutionId) {
             const instRef = doc(db, "institutions", userData.institutionId);
             const instSnap = await getDoc(instRef);
@@ -65,7 +61,6 @@ export function AuthProvider({ children }) {
             }
           }
         } else {
-          // New user — default to student
           userData = {
             uid: currentUser.uid,
             email: currentUser.email,
@@ -93,8 +88,6 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, [navigate, initialLoad]);
 
-  // ----------- LOGIN / SIGNUP ACTIONS -----------
-
   const loginWithEmail = async (email, password) => {
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
@@ -106,7 +99,6 @@ export function AuthProvider({ children }) {
         ? userSnap.data()
         : { uid: currentUser.uid, email, role: "student", status: "approved" };
 
-      // Check if institution suspended
       if (userData.institutionId) {
         const instRef = doc(db, "institutions", userData.institutionId);
         const instSnap = await getDoc(instRef);
@@ -136,7 +128,6 @@ export function AuthProvider({ children }) {
         ? userSnap.data()
         : { uid: currentUser.uid, email: currentUser.email, role: "student", status: "approved" };
 
-      // Institution check
       if (userData.institutionId) {
         const instRef = doc(db, "institutions", userData.institutionId);
         const instSnap = await getDoc(instRef);

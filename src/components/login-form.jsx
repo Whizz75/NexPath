@@ -31,10 +31,8 @@ export function LoginForm({ className, ...props }) {
 
     try {
       await loginWithEmail(email, password);
-      // redirect handled in AuthContext based on role/status
     } catch (err) {
       console.error(err);
-      // Custom messages for pending/denied users
       if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
         setError("Invalid email or password.");
       } else {
@@ -50,7 +48,6 @@ export function LoginForm({ className, ...props }) {
     setLoading(true);
     try {
       await loginWithGoogle();
-      // redirect handled in AuthContext
     } catch (err) {
       console.error(err);
       setError(err.message || "Google login failed.");
@@ -62,12 +59,20 @@ export function LoginForm({ className, ...props }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-6 items-center justify-center min-h-screen bg-background p-4",
+        "flex flex-col gap-6 items-center justify-center min-h-screen bg-slate-950 p-4",
         className
       )}
       {...props}
     >
-      <Card className="w-[450px] max-w-md shadow-xl border border-border rounded-xl">
+      <div className="flex items-center justify-center gap-3 mb-6">
+        <img
+          src="/logo.png"
+          alt="NexPath Logo"
+          className="w-12 h-12"
+        />
+        <h1 className="text-3xl font-bold text-slate-100">NexPath</h1>
+      </div>
+      <Card className="w-[450px] max-w-md bg-slate-900 shadow-xl border border-border rounded-xl">
         <CardHeader>
           <CardTitle className="text-teal-400 text-[1.1em]">
             Welcome back

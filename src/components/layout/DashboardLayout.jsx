@@ -1,4 +1,3 @@
-// src/components/layout/DashboardLayout.jsx
 import {
   SidebarProvider,
   SidebarInset,
@@ -33,7 +32,6 @@ export default function DashboardLayout() {
       <AppSidebar />
 
       <SidebarInset>
-        {/* Sticky Header: keep original spacing & padding */}
         <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-slate-700 bg-navy/100 text-slate-100 shadow-md backdrop-blur-sm px-6 md:px-10">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4 border-slate-600" />
@@ -70,7 +68,6 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Main Content: offset by header height to prevent overlap */}
         <main className="flex flex-1 flex-col gap-6 p-6 md:p-10 bg-slate-900 overflow-y-auto min-h-[calc(100vh-4rem)] rounded-t-2xl shadow-inner">
           <Outlet />
         </main>
